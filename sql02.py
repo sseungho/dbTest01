@@ -15,7 +15,10 @@ sql = "INSERT INTO membertbl VALUES ('Jennifer', '제니퍼', '미국 플로리�
 
 cur = dbConn.cursor()
 
-cur.execute(sql) #연결된 DB의 스키마에 지정된 SQL 문이 실행
+result = cur.execute(sql) #연결된 DB의 스키마에 지정된 SQL 문이 실행
+if result == 1:
+    print('회원 가입 성공')
+# insert, update, delete 문이 excute() 함수가 성공적으로 실행되면 1(INT) 을 반환
 
 # records = cur.fetchall()    # sql 문에서 실행된 SELECT 문의 결과를 records에 받음 (tuple 로 반환)
 #
