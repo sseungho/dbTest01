@@ -21,6 +21,8 @@ class MainWindow(QMainWindow, form_class):
         self.membermodify_btn.clicked.connect(self.member_modify)   # 회원 정보 수정 함수 호출
         self.login_btn.clicked.connect(self.memberLogin)
         self.loginreset_btn.clicked.connect(self.logininfo_reset)
+        self.cancel_btn.clicked.connect(self.memberCancel)
+
     def member_join(self):     # 회원가입 이벤트 처리 함수
         memberid = self.joinid_edit.text() # 유저가 입력한 회원 아이디 텍스트 가져오기
         memberpw = self.joinpw_edit.text() # 유저가 입력한 회원 비밀번호 텍스트 가져오기
@@ -180,6 +182,38 @@ class MainWindow(QMainWindow, form_class):
         self.loginid_edit.clear()
         self.loginpw_edit.clear()
 
+    def memberCancel(self):
+        cancelid = self.cancelid_edit.text()
+        cancelpw = self.cancelpw_edit.text()
+        if cancelid == "" or cancelpw == "":  # 아이디, 비번 공란 확인
+            QMessageBox.warning(self, "로그인 실패", "아이디 또는 비번 입력하세요.")
+        else:
+            dbConn = pymysql.connect(user="root", password="12345", host="localhost", db="shop_db")
+            sql = f"SELECT count(*) FROM appmember WHERE memberid='{cancelid}' AND memberpw='{cancelpw}'"
+
+            # 아이디와 비밀번호가 모두 일치하는 레코드 개수를 반환(1 또는 0 반환 tuple)
+
+            cur = dbConn.cursor()
+            cur.execute(sql)
+
+            result = cur.fetchall()  # 1이면 아이디와 패스워드 확인 성공, 아니면 실패
+            print(result, cancelid)
+
+            if result[0][0] == 1:   # 아이디와 패스워드 확인 성공
+                sql = f"DELETE FROM appmember WHERE memberid='{cancelid}'"
+                cur = dbConn.cursor()
+                result2 = cur.execute(sql)  # 연결된 DB의 스키마에 지정된 SQL 문이 실행
+                dbConn.commit()
+                if result2 == 1:
+                    QMessageBox.warning(self, " 성공", f"{cancelid}님 회원탈퇴 성공.")
+                    self.cancelinfo_reset()
+
+            else:
+                QMessageBox.warning(self, "회원탈퇴 실패", "아이디 또는 비번 다시 입력하세요.")
+
+    def cancelinfo_reset(self):  # 회원탈퇴 입력 화면 초기화
+        self.cancelid_edit.clear()
+        self.cancelpw_edit.clear()
 
 app = QApplication(sys.argv)
 win = MainWindow()
