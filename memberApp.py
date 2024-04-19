@@ -15,8 +15,12 @@ class MainWindow(QMainWindow, form_class):
 
         self.join_btn.clicked.connect(self.member_join)
         self.joinreset_btn.clicked.connect(self.join_reset)
+        self.memberreset_btn.clicked.connect(self.memberinfo_reset)
         self.idcheck_btn.clicked.connect(self.idcheck)
-
+        self.membersearch_btn.clicked.connect(self.member_search)   # 회원 조회 버튼 클릭 시 회원 정보 출력 함수 실행
+        self.membermodify_btn.clicked.connect(self.member_modify)   # 회원 정보 수정 함수 호출
+        self.login_btn.clicked.connect(self.memberLogin)
+        self.loginreset_btn.clicked.connect(self.logininfo_reset)
     def member_join(self):     # 회원가입 이벤트 처리 함수
         memberid = self.joinid_edit.text() # 유저가 입력한 회원 아이디 텍스트 가져오기
         memberpw = self.joinpw_edit.text() # 유저가 입력한 회원 비밀번호 텍스트 가져오기
@@ -56,8 +60,8 @@ class MainWindow(QMainWindow, form_class):
         self.joinname_edit.clear()
         self.joinage_edit.clear()
 
-    def idcheck(self): # 기존 회원 가입 여부 체크 함수
-        memberid = self.joinid_edit.text() # 유저가 입력한 회원 아이디 텍스트 가져오기
+    def idcheck(self):  # 기존 회원 가입 여부 체크 함수
+        memberid = self.joinid_edit.text()  # 유저가 입력한 회원 아이디 텍스트 가져오기
 
         if memberid == "":
             QMessageBox.warning(self, 'ID 입력 오류', 'ID는 필수 입력 사항입니다!')
@@ -69,6 +73,8 @@ class MainWindow(QMainWindow, form_class):
             cur = dbConn.cursor()
             cur.execute(sql)
             result = cur.fetchall()
+            cur.close()
+            dbConn.close()
 
             if result[0][0] == 1:
                 QMessageBox.warning(self, '회원 가입 불가 ', '이미 가입된 ID! \n다시 입력 하세요.')
@@ -76,6 +82,105 @@ class MainWindow(QMainWindow, form_class):
             else:
                 QMessageBox.warning(self, '회원 가입 성공 ', '계속해서 진행 하세요.')
                 return 1
+    def membercheck(self): # 기존 회원 가입 여부 체크 함수
+        memberid = self.memberid_edit.text() # 유저가 입력한 회원 아이디 텍스트 가져오기
+
+        dbConn = pymysql.connect(user="root", password="12345", host="localhost", db="shop_db")
+        sql = f"SELECT count(*) FROM appmember WHERE memberID = '{memberid}'"
+        cur = dbConn.cursor()
+        cur.execute(sql)
+        result = cur.fetchall()
+
+        cur.close()
+        dbConn.close()
+
+        if result[0][0] == 1:
+            return 1
+        else:
+            QMessageBox.warning(self, '회원 조회 불가', 'ID 검색 안됨 다시 입력 하세요.')
+            self.memberinfo_reset()
+            return 0
+    def member_search(self):    # 아이디로 회원 정보 조회
+        memberid = self.memberid_edit.text() # 유저가 입력한 회원 아이디 텍스트 가져오기
+        dbConn = pymysql.connect(user="root", password="12345", host="localhost", db="shop_db")
+        sql = f"SELECT * FROM appmember WHERE memberID = '{memberid}'"
+        if memberid == "":
+            QMessageBox.warning(self, 'ID 입력 오류', 'ID는 필수 입력 사항입니다!')
+        elif self.membercheck() == 0:
+            pass
+        else:
+            cur = dbConn.cursor()
+            cur.execute(sql)
+            result = cur.fetchall()
+
+            cur.close()
+            dbConn.close()
+            print(result)
+
+            self.memberpw_edit.setText(result[0][1])
+            self.membername_edit.setText(result[0][2])
+            self.memberemail_edit.setText(result[0][3])
+            self.memberage_edit.setText(str(result[0][4]))
+    def memberinfo_reset(self):  # 회원 가입 정보 입력 화면 초기화
+        self.memberid_edit.clear()
+        self.memberpw_edit.clear()
+        self.memberemail_edit.clear()
+        self.membername_edit.clear()
+        self.memberage_edit.clear()
+
+
+    def member_modify(self):  # 회원 가입 정보 입력 화면 초기화
+        memberid = self.memberid_edit.text()
+        memberpw = self.memberpw_edit.text()
+        memberemail = self.memberemail_edit.text()
+        membername = self.membername_edit.text()
+        memberage = self.memberage_edit.text()
+
+        dbConn = pymysql.connect(user="root", password="12345", host="localhost", db="shop_db")
+
+        sql = f"UPDATE appmember SET memberpw = '{memberpw}', membername = '{membername}', memberemail = '{memberemail}', memberage = '{memberage}' WHERE memberid = '{memberid}'"
+        cur = dbConn.cursor()
+        result = cur.execute(sql)
+
+        if result == 1:     # 회원 정보 수정 성공
+            QMessageBox.warning(self, '회원정보수정 성공', '회원 정보 수정 완료!')
+        else:
+            QMessageBox.warning(self, '실패', '회원정보 수정 실패!')
+
+        cur.close()
+        dbConn.commit()
+        dbConn.close()
+
+    def memberLogin(self):
+        loginid = self.loginid_edit.text()    # 유저가 로그인 창에 입력한 아이디 가져오기
+        loginpw = self.loginpw_edit.text()    # 패스워드 가져오기
+
+        if loginid == "" or loginpw == "":  # 아이디, 비번 공란 확인
+            QMessageBox.warning(self, "로그인 실패", "아이디 또는 비번 입력하세요.")
+        else:
+            dbConn = pymysql.connect(user="root", password="12345", host="localhost", db="shop_db")
+            sql = f"SELECT count(*) FROM appmember WHERE memberid='{loginid}' AND memberpw='{loginpw}'"
+
+            # 아이디와 비밀번호가 모두 일치하는 레코드 개수를 반환(1 또는 0 반환 tuple)
+
+            cur = dbConn.cursor()
+            cur.execute(sql)
+
+            result = cur.fetchall()  # 1이면 로그인 성공, 아니면 실패
+            print(result)
+
+            if result[0][0] == 1:   # 로그인 성공
+                QMessageBox.warning(self, "로그인 성공", f"{loginid}님 로그인 성공.")
+
+            else:
+                QMessageBox.warning(self, "로그인 실패", "아이디 또는 비번 입력하세요.")
+
+
+    def logininfo_reset(self):  # 로그인 입력 화면 초기화
+        self.loginid_edit.clear()
+        self.loginpw_edit.clear()
+
+
 app = QApplication(sys.argv)
 win = MainWindow()
 win.show()
