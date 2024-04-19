@@ -11,7 +11,7 @@ import pymysql  # mysql 과 연동 시켜주는 라이브러리
 dbConn = pymysql.connect(host='localhost', user='root', password='12345', db='shop_db')
 # 파이썬과 mysql 간 connection 생성
 
-sql = "INSERT INTO membertbl VALUES ('Jennifer', '제니퍼', '미국 플로리다')" # DB에 실행할 SQL 문 생성
+sql = "INSERT INTO membertbl VALUES ('Hillary', '힐러리', '제주도 애월')" # DB에 실행할 SQL 문 생성
 
 cur = dbConn.cursor()
 
