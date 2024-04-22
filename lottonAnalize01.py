@@ -22,7 +22,7 @@ lotto_num_df = pd.DataFrame(lotto_df.iloc[0:,2:])  # 당첨 번호와 보너스 
 lotto_num_list = (list(lotto_num_df['당첨번호1']) + list(lotto_num_df['당첨번호2']) + list(lotto_num_df['당첨번호3']) + list(lotto_num_df['당첨번호4'])) + list(lotto_num_df['당첨번호5']) + list(lotto_num_df['당첨번호6']) + list(lotto_num_df['보너스번호'])
 print(len(lotto_num_list))
 
-for i in range(1,46):
+for i in range(1, 46):
     count = 0
     for num in lotto_num_list:
         if i == num:
