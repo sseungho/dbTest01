@@ -4,7 +4,7 @@ import sys
 import urllib.request
 client_id = "npUTBllHPTYmbUeZzDNR"
 client_secret = "M2VxrCx4X8"
-encText = urllib.parse.quote("BTS")
+encText = urllib.parse.quote("오징어게임2")
 url = "https://openapi.naver.com/v1/search/news?query=" + encText # JSON 결과
 # url = "https://openapi.naver.com/v1/search/blog.xml?query=" + encText # XML 결과
 request = urllib.request.Request(url)
