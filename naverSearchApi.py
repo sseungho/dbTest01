@@ -1,4 +1,5 @@
 from urllib.request import *
+from urllib.parse import quote
 import json
 import datetime
 
@@ -24,12 +25,12 @@ class NaverApi:
             # 응답 결과 error 아무것도 반환하지 않음
 
     def getNaverSearch(self, node, keyword, start, display):
-        baseURL = "https://openapi.naver.com/v1/search/"    #   네이버 API 기본 url
+        baseUrl = "https://openapi.naver.com/v1/search/"    #   네이버 API 기본 url
         node = f"{node}.json"
-        params = f"?query={keyword}&start={start}&display={display}"
+        params = f"?query={quote(keyword)}&start={start}&display={display}"
 
         url = baseUrl+node+params
-        result = self.getRequestUrlCpde(url)
+        result = self.getRequestUrlCode(url)
 
         if result != None:  # 네이버에서 결과가 정상도착
             return json.loads(result)   # json 형식으로 반환
